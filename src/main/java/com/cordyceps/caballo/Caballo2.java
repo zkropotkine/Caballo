@@ -12,22 +12,25 @@ import java.util.*;
  */
 public class Caballo2 {
     private final static int base = 8;
-    private static int[][] grid;
+    private static int[][] board;
     private static int totalMoves;
     private final static int[][] moves = {{ 1,-2}, { 2, -1}, { 2, 1}, { 1,  2},
                                           {-1, 2}, {-2,  1}, {-2,-1}, {-1, -2}};
     
-    private final static int [][] blackPieces = {{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}};
+    //private final static int [][] blackPieces = {};
+    private final static int [][] blackPieces = {{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}};
     private static Map<String, Boolean> blackPiecesContainer = new HashMap<>();
     
     private final static int [][] whitePieces = {{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}};
+    
+    //private final static int [][] whitePieces = {};
     private static Map<String, Boolean> whitePiecesContainer = new HashMap<>();
 
     public static void main(String[] args) {
         // Set the random position as the inital position.
         int initialMove = 1;
         
-        grid = new int[base][base];
+        board = new int[base][base];
         int[][] initialGrid = new int[base][base];
         
         totalMoves = (base) * (base) - blackPieces.length;
@@ -49,19 +52,23 @@ public class Caballo2 {
             whitePiecesContainer.put(x + "," + y, Boolean.TRUE);
         }
         
+        System.out.println("Initial Board");
         printResultGrid(initialGrid);
         
         // Obtain random positions for the column & row
         int row = 2 + (int) (Math.random() * (base - 4));
         int col = 2 + (int) (Math.random() * (base - 4));
         
-        grid[row][col] = initialMove;
-
-        if (solve(row, col, ++initialMove)) {
+        board[row][col] = initialMove;
+        
+        if (whitePieces.length <= 0) {
+            System.out.println("There are not white pieces to remove.");
+        }
+        else if (solve(row, col, ++initialMove)) {
             printResult();
         }    
         else {
-            System.out.println("Sorry, we didn't found a route");
+            System.out.println("Sorry, we didn't found a route.");
         }
  
     }
@@ -93,7 +100,7 @@ public class Caballo2 {
             
             
             if (blackPiecesContainer.containsKey(key)) {
-                grid[row][column] = -1;
+                board[row][column] = -1;
                 //currentMove;
                 continue;
             } else {
@@ -104,18 +111,18 @@ public class Caballo2 {
                   System.out.println("A white piece is found on " + key);
                   
                   if (whitePiecesContainer.isEmpty()) {
-                      System.out.println("We found all the white pieces :)");
+                      System.out.println("We found all the white pieces :) \n");
                       return true;
                   }
                }
                 
-               grid[row][column] = currentMove;
+               board[row][column] = currentMove;
             }
             
             if (!orphanDetected(currentMove, row, column) && solve(row, column, currentMove + 1)) {
                 return true;
             }    
-            grid[row][column] = 0;
+            board[row][column] = 0;
         }
  
         return false;
@@ -136,7 +143,7 @@ public class Caballo2 {
             int newRow = row + move[y];
             int newColumn = column + move[x];
             
-            if (checkValidPosition(newRow, newColumn) && grid[newRow][newColumn] == 0) {
+            if (checkValidPosition(newRow, newColumn) && (board[newRow][newColumn] == 0 || whitePiecesContainer.containsKey(newRow +","+newColumn))) {
                 int num = countNeighbors(newRow, newColumn);
                 neighbors.add(new int[]{newRow, newColumn, num});
             }
@@ -159,7 +166,7 @@ public class Caballo2 {
             int newRow = row + move[y];
             int newColumn = column + move[x];
             
-            if (checkValidPosition(newRow, newColumn) && grid[newRow][newColumn] == 0) {
+            if (checkValidPosition(newRow, newColumn) && (board[newRow][newColumn] == 0 || whitePiecesContainer.containsKey(newRow +","+newColumn))) {
                 neighbors++;
             }
         }
@@ -189,7 +196,8 @@ public class Caballo2 {
     }
  
     private static void printResult() {
-        printResultGrid(grid);
+        System.out.println("The result board is: ");
+        printResultGrid(board);
     }
     
      private static void printResultGrid(int[][] grid) {
@@ -201,5 +209,5 @@ public class Caballo2 {
         }
         System.out.println();
         System.out.println();
-    }
+     }
 }
