@@ -11,29 +11,52 @@ import java.util.*;
  * @author zkropotkine
  */
 public class Caballo2 {
-    private final static int base = 5;
+    private final static int base = 8;
     private static int[][] grid;
     private static int totalMoves;
     private final static int[][] moves = {{ 1,-2}, { 2, -1}, { 2, 1}, { 1,  2},
                                           {-1, 2}, {-2,  1}, {-2,-1}, {-1, -2}};
     
-    //private final static int [][] whitePieces = {{}, {}, {}, {}}
- 
+    private final static int [][] blackPieces = {{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}};
+    private static Map<String, Boolean> blackPiecesContainer = new HashMap<>();
+    
+    private final static int [][] whitePieces = {{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}};
+    private static Map<String, Boolean> whitePiecesContainer = new HashMap<>();
+
     public static void main(String[] args) {
-        grid = new int[base][base];
-        totalMoves = (base) * (base);
+        // Set the random position as the inital position.
+        int initialMove = 1;
         
-        // Print initial grid.
-        printResult();
+        grid = new int[base][base];
+        int[][] initialGrid = new int[base][base];
+        
+        totalMoves = (base) * (base) - blackPieces.length;
+        
+        for (int[] whitePiece : blackPieces) {
+            int x = whitePiece[0];
+            int y = whitePiece[1];
+            
+            
+            initialGrid[x][y] = -1;
+            blackPiecesContainer.put(x + "," + y, Boolean.TRUE);
+        }
+        
+        for (int[] whitePiece : whitePieces) {
+            int x = whitePiece[0];
+            int y = whitePiece[1];
+            
+            initialGrid[x][y] = 1;
+            whitePiecesContainer.put(x + "," + y, Boolean.TRUE);
+        }
+        
+        printResultGrid(initialGrid);
         
         // Obtain random positions for the column & row
         int row = 2 + (int) (Math.random() * (base - 4));
         int col = 2 + (int) (Math.random() * (base - 4));
         
-        // Set the random position as the inital position.
-        int initialMove = 1;
         grid[row][col] = initialMove;
- 
+
         if (solve(row, col, ++initialMove)) {
             printResult();
         }    
@@ -44,6 +67,7 @@ public class Caballo2 {
     }
  
     private static boolean solve(int row, int column, int currentMove) {
+        //printResult();
         if (currentMove > totalMoves) {
             return true;
         }
@@ -64,7 +88,30 @@ public class Caballo2 {
         for (int[] neighbor : neighbors) {
             row = neighbor[0];
             column = neighbor[1];
-            grid[row][column] = currentMove;
+            boolean found = false;
+            String key = row + "," + column;
+            
+            
+            if (blackPiecesContainer.containsKey(key)) {
+                grid[row][column] = -1;
+                //currentMove;
+                continue;
+            } else {
+                
+               if (whitePiecesContainer.containsKey(key)) {
+                  whitePiecesContainer.remove(key);
+                  
+                  System.out.println("A white piece is found on " + key);
+                  
+                  if (whitePiecesContainer.isEmpty()) {
+                      System.out.println("We found all the white pieces :)");
+                      return true;
+                  }
+               }
+                
+               grid[row][column] = currentMove;
+            }
+            
             if (!orphanDetected(currentMove, row, column) && solve(row, column, currentMove + 1)) {
                 return true;
             }    
@@ -142,6 +189,10 @@ public class Caballo2 {
     }
  
     private static void printResult() {
+        printResultGrid(grid);
+    }
+    
+     private static void printResultGrid(int[][] grid) {
         for (int[] row : grid) {
             for (int i : row) {
                 System.out.printf("%2d ", i);
